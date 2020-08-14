@@ -1,0 +1,30 @@
+{
+  "name": "web-form-inspector",
+  "version": "1.0.0",
+  "description": "Locate html dom elements by genexus id",
+  "main": "gx_form_inspector.js",
+  "scripts": {
+    "build": "babel src -d lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genexuslabs/web-form-inspector.git"
+  },
+  "keywords": [
+    "genexus",
+    "web",
+    "test"
+  ],
+  "author": "dmendez@genexus.com",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/genexuslabs/web-form-inspector/issues"
+  },
+  "homepage": "https://github.com/genexuslabs/web-form-inspector#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0"
+  }
+}
