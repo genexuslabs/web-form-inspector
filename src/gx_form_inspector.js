@@ -15,7 +15,9 @@ window.addEventListener("load", () => {
 	gx.forminspector = function (ctrl_gxid, row, gxobjectWC) {
 		const gx_control_att = 'data-gx-control-name';
 		const initailize_gx_object = function(gxo) {
-				gxo.GXCtrlIds.map( i => {
+				(gxo &&
+					gxo.GXCtrlIds &&
+					gxo.GXCtrlIds.map( i => {
 						let vStruct = gxo.GXValidFnc[i];
 						if (vStruct){
 							let gxName = '';
@@ -28,11 +30,12 @@ window.addEventListener("load", () => {
 								else {
 									gxName = vStruct.fld;
 								}
-								let rExp = new RegExp(`(span_)?${gxo.CmpContext}${vStruct.fld}(_([0-9]{4})*)?`);
+								let rExp = new RegExp(`(span_)?${gxo.CmpContext}${vStruct.fld}(_([0-9]{4})*)?$`);
 								$('[id]').filter(function() {return $(this)[0].id.match(rExp)}).attr(gx_control_att, gxName.toLowerCase());
 							}
 						}
-					});
+					})
+				);
 		};
 		const _init = () => {
 			if (!gx.forminspector._initialized) {
