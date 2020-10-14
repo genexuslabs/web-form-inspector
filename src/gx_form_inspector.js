@@ -79,5 +79,18 @@ window.addEventListener("load", () => {
 		});
 		return ret;
 	};
-
+	gx.inspector = {
+		formmessages: function() {
+			//Return array of GX messages (msg) in form
+			return $.map($("[class='gx_ev']"), (n,i) => { const $n = $(n); return ($n.text().length > 0) ? $n.text() : null})
+		},
+		formelements: function( opts) {
+			//opts is an object with properties:
+			//ctrl_gxid is the control name as defined in Genexus (Required)
+			//row is a optional filter in case that then selected control is in a grid level (Optional)
+			//gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
+			const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
+			return gx.forminspector(ctrl_gxid, row, gxobjectWC);
+		}
+	}
 })
