@@ -55,7 +55,7 @@ window.addEventListener("load", () => {
 			selector = `[data-gxrow="${srow}"] ` + selector;
 		}
 		let targets = gx.$(selector);
-		let filterPrefixWC = gxobjectWC ? gx.O.WebComponents.filter((wc) => wc.ServerClass === gxobjectWC.toLowerCase()) : [];
+		const filterPrefixWC = gxobjectWC ? gx.O.WebComponents.filter((wc) => wc.ServerClass === gxobjectWC.toLowerCase()) : [];
 		
 		ret = gx.$.map( targets, function( target) {
 			let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
@@ -80,17 +80,40 @@ window.addEventListener("load", () => {
 		return ret;
 	};
 	gx.inspector = {
-		formmessages: function() {
+		messages: function() {
 			//Return array of GX messages (msg) in form
 			return $.map($("[class='gx_ev']"), (n,i) => { const $n = $(n); return ($n.text().length > 0) ? $n.text() : null})
 		},
-		formelements: function( opts) {
+		elements: function( opts) {
 			//opts is an object with properties:
 			//ctrl_gxid is the control name as defined in Genexus (Required)
 			//row is a optional filter in case that then selected control is in a grid level (Optional)
 			//gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
 			const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
 			return gx.forminspector(ctrl_gxid, row, gxobjectWC);
+		},
+		grids: function( opts) {
+			//opts is an object with properties:
+			//ctrl_gxid is the control name as defined in Genexus (Required)
+			//row is a optional filter in case that then selected control is in a grid level (Optional)
+			//Row number shold be of length 4 with '0'left padding 
+			//0001001 row1 at parent row1 - 00010002 row2 at parent row1
+			//gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
+			const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
+			const wcFilter = wc => !gxobjectWC || wc.ServerClass === gxobjectWC.toLowerCase() ? wc : null; 
+			const gFilter = g => ((g.realGridName === ctrl_gxid) && (!row || (g.parentRow.gxId === row))) ? g : null; 
+			const wcGrids = gx.O.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat();
+			const mpGrids = gx.O.MasterPage ? gx.O.MasterPage.Grids : [];
+			let Grids = (!gxobjectWC ? gx.O.Grids : []).concat(wcGrids).concat(mpGrids);
+			const retObj = g =>	{
+				return { 
+					id: g.getContainerControl().id ,
+					cmp: g.parentObject?.CmpContext || "",
+					rows: g.grid.rows.length,
+					InMasterPage: g.parentObject?.IsMasterPage || false,
+				}
+			};
+			return Grids.filter( gFilter).map(retObj);
 		}
 	}
 })
