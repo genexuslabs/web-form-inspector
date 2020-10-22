@@ -82,7 +82,7 @@ window.addEventListener("load", () => {
 	gx.inspector = {
 		messages: function() {
 			//Return array of GX messages (msg) in form
-			return $.map($("[class='gx_ev']"), (n,i) => { const $n = $(n); return ($n.text().length > 0) ? $n.text() : null})
+			return $.map($(".gx_ev"), (n,i) => { const $n = $(n); return ($n.text().length > 0) ? $n.text() : null})
 		},
 		elements: function( opts) {
 			//opts is an object with properties:
