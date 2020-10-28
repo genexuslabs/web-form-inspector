@@ -109,7 +109,7 @@ window.addEventListener("load", () => {
 			//row is a optional filter in case that then selected control is in a grid level (Optional)
 			//gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
 			const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
-			return gx.forminspector(ctrl_gxid, row, gxobjectWC);
+			return gx.forminspector(ctrl_gxid, row, gxobjectWC).concat(gx.inspector.grids(opts));
 		},
 		grids: function( opts) {
 			//opts is an object with properties:
@@ -120,7 +120,7 @@ window.addEventListener("load", () => {
 			//gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
 			const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
 			const wcFilter = wc => !gxobjectWC || wc.ServerClass === gxobjectWC.toLowerCase() ? wc : null; 
-			const gFilter = g => ((g.realGridName === ctrl_gxid) && (!row || (g.parentRow.gxId === row))) ? g : null; 
+			const gFilter = g => ((g.realGridName.toLowerCase() === ctrl_gxid.toLowerCase()) && (!row || (g.parentRow.gxId === row))) ? g : null; 
 			const wcGrids = gx.O.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat();
 			const mpGrids = gx.O.MasterPage ? gx.O.MasterPage.Grids : [];
 			let Grids = (!gxobjectWC ? gx.O.Grids : []).concat(wcGrids).concat(mpGrids);
