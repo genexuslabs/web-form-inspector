@@ -113,7 +113,7 @@ window.addEventListener("load", () => {
             }
         });
 		gx.$(ret).each(function(i, el) {
-  	  		let nRows = gx.$(`#${el.id} tr`).length;
+  	  		let nRows = gx.$(`#${el.id} tr, #${el.id} div[class=row], #${el.id} div[data-gx-smarttable-cell], #${el.id} div[data-gx-canvas-cell]`).length;
 	  	  	if (nRows > 0) {
 		  	  	el.rows = nRows;
 			    }
