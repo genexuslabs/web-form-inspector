@@ -112,6 +112,12 @@ window.addEventListener("load", () => {
                 return [{inMasterPage: inMasterPage, cmp: cmpElement || "", id:target.id , value:target.value || target.textContent}];
             }
         });
+		gx.$(ret).each(function(i, el) {
+  	  		let nRows = gx.$(`#${el.id} tr`).length;
+	  	  	if (nRows > 0) {
+		  	  	el.rows = nRows;
+			    }
+    	});
         return ret;
     }
 
