@@ -109,6 +109,7 @@ window.addEventListener("load", () => {
                 return [{	inMasterPage: inMasterPage, 
 							id:target.id, 
 							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
+							isComponent:cmpElement[0].isComponent,
 							value:target.value || target.textContent
 						}];
             }
