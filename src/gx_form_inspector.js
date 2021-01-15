@@ -50,8 +50,7 @@ window.addEventListener("load", () => {
     gx.forminspector = function (ctrl_gxid, row, gxobjectWC) {
         const gx_control_att = 'data-gx-control-name';
         const initialize_gx_object = function(gxo) {
-                (gxo &&
-                    gxo.GXCtrlIds &&
+				if (gxo && gxo.GXCtrlIds) {
                     gxo.GXCtrlIds.map( i => {
                         let vStruct = gxo.GXValidFnc[i];
                         if (vStruct){
@@ -69,8 +68,11 @@ window.addEventListener("load", () => {
                                 $('[id]').filter(function() {return $(this)[0].id.match(rExp)}).attr(gx_control_att, gxName.toLowerCase());
                             }
                         }
-                    })
-                );
+                    });
+					for (wc in gxo.CmpControls) {
+						$(`#${gxo.CmpContext}gxHTMLWrp${gxo.CmpControls[wc].Prefix}`).attr(gx_control_att, gxo.CmpControls[wc].id.toLowerCase())
+					}
+				}					
         };
         const _init = () => {
             if (!gx.forminspector._initialized) {
@@ -90,13 +92,13 @@ window.addEventListener("load", () => {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
         let targets = gx.$(selector);
-        const filterPrefixWC = gxobjectWC ? gx.O.WebComponents.filter((wc) => wc.ServerClass === gxobjectWC.toLowerCase()) : [];
+        const filterPrefixWC = gxobjectWC ? gx.O.WebComponents.filter((wc) => wc.ServerClass === gxobjectWC.toLowerCase()) : null;
 
         ret = gx.$.map( targets, function( target) {
             let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
                     let stripCmpName = id => id.replace(/^gxHTMLWrp/,'');
                     let id = el.id;
-                    if (filterPrefixWC.length > 0) {
+                    if (filterPrefixWC) {
                         let match = filterPrefixWC.filter((wc) => id.endsWith(wc.CmpContext));
                         if (match.length > 0) {
                             return stripCmpName(match[0].CmpContext);
@@ -114,7 +116,7 @@ window.addEventListener("load", () => {
         });
 		gx.$(ret).each(function(i, el) {
   	  		let nRows = gx.$(`#${el.id} tr, #${el.id} div[class=row], #${el.id} div[data-gx-smarttable-cell], #${el.id} div[data-gx-canvas-cell]`).length;
-	  	  	if (nRows > 0) {
+	  	  	if ( !el.cmp && nRows > 0) {
 		  	  	el.rows = nRows;
 			    }
     	});
