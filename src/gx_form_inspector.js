@@ -92,31 +92,30 @@ window.addEventListener("load", () => {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
         let targets = gx.$(selector);
-        const filterPrefixWC = gxobjectWC ? gx.O.WebComponents.filter((wc) => wc.ServerClass === gxobjectWC.toLowerCase()) : null;
 
         ret = gx.$.map( targets, function( target) {
             let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
+					const gxCtrlName = gx.$(el).attr( gx_control_att);
                     let stripCmpName = id => id.replace(/^gxHTMLWrp/,'');
                     let id = el.id;
-                    if (filterPrefixWC) {
-                        let match = filterPrefixWC.filter((wc) => id.endsWith(wc.CmpContext));
-                        if (match.length > 0) {
-                            return stripCmpName(match[0].CmpContext);
-                        }
-                    }
-                    else {
-                        return stripCmpName(id);
-                    }
+					return (!gxobjectWC || gxobjectWC.toLowerCase() === gxCtrlName) ?
+						{	isComponent: target === el,
+							cmpctrl_gxid: gxCtrlName, 
+						}:null;
                 }
-            ).get().join();
+            );
             let inMasterPage = target.id.endsWith('_MPAGE');
             if (!gxobjectWC || cmpElement.length > 0) {
-                return [{inMasterPage: inMasterPage, cmp: cmpElement || "", id:target.id , value:target.value || target.textContent}];
+                return [{	inMasterPage: inMasterPage, 
+							id:target.id, 
+							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
+							value:target.value || target.textContent
+						}];
             }
         });
 		gx.$(ret).each(function(i, el) {
   	  		let nRows = gx.$(`#${el.id} tr, #${el.id} div[class=row], #${el.id} div[data-gx-smarttable-cell], #${el.id} div[data-gx-canvas-cell]`).length;
-	  	  	if ( !el.cmp && nRows > 0) {
+	  	  	if ( !el.isComponent && nRows > 0) {
 		  	  	el.rows = nRows;
 			    }
     	});
