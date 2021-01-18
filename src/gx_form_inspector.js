@@ -105,7 +105,15 @@ window.addEventListener("load", () => {
                 }
             );
             let inMasterPage = target.id.endsWith('_MPAGE');
-            if (cmpElement.length > 0) {
+            if (cmpElement.length === 0) {
+                return gxobjectWC ? null :
+						[{	inMasterPage: inMasterPage, 
+							id:target.id, 
+							isComponent:false,
+							value:target.value || target.textContent
+						}];
+			}
+			else {
                 return [{	inMasterPage: inMasterPage, 
 							id:target.id, 
 							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
