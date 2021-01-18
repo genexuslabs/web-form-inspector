@@ -106,7 +106,8 @@ window.addEventListener("load", () => {
             );
             let inMasterPage = target.id.endsWith('_MPAGE');
             if (cmpElement.length === 0) {
-                return [{	inMasterPage: inMasterPage, 
+                return gxobjectWC ? null :
+						[{	inMasterPage: inMasterPage, 
 							id:target.id, 
 							isComponent:false,
 							value:target.value || target.textContent
