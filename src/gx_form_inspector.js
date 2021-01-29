@@ -76,9 +76,9 @@ window.addEventListener("load", () => {
         };
         const _init = () => {
             if (!gx.forminspector._initialized) {
-                initialize_gx_object( gx.O);
+                initialize_gx_object( gx.pO);
                 initialize_gx_object( gx.pO.MasterPage);
-                gx.O.WebComponents.map( gxComponent => initialize_gx_object( gxComponent));
+                gx.pO.WebComponents.map( gxComponent => initialize_gx_object( gxComponent));
                 gx.fx.obs.addObserver('webcom.render', gx.forminspector, gxComponent => initialize_gx_object( gxComponent));
                 gx.forminspector._initialized = true;
             }
