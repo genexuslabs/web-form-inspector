@@ -96,8 +96,8 @@ window.addEventListener("load", () => {
         ret = gx.$.map( targets, function( target) {
             let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
 					const gxCtrlName = gx.$(el).attr( gx_control_att);
-                    let stripCmpName = id => id.replace(/^gxHTMLWrp/,'');
-                    let id = el.id;
+                    //let stripCmpName = id => id.replace(/^gxHTMLWrp/,''); // unused variables
+                    //let id = el.id;
 					return (!gxobjectWC || gxobjectWC.toLowerCase() === gxCtrlName) ?
 						{	isComponent: target === el,
 							cmpctrl_gxid: gxCtrlName, 
@@ -110,7 +110,8 @@ window.addEventListener("load", () => {
 						[{	inMasterPage: inMasterPage, 
 							id:target.id, 
 							isComponent:false,
-							value:target.value || target.textContent
+							value: target.value,
+							text: target.textContent
 						}];
 			}
 			else {
@@ -118,7 +119,8 @@ window.addEventListener("load", () => {
 							id:target.id, 
 							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
 							isComponent:cmpElement[0].isComponent,
-							value:target.value || target.textContent
+							value: target.value,
+							text: target.textContent
 						}];
             }
         });
@@ -152,17 +154,37 @@ window.addEventListener("load", () => {
             //0001001 row1 at parent row1 - 00010002 row2 at parent row1
             //gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
             const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
-            const wcFilter = wc => !gxobjectWC || wc.ServerClass === gxobjectWC.toLowerCase() ? wc : null;
+
+            //const wcFilter = wc => !gxobjectWC || wc.ServerClass === gxobjectWC.toLowerCase() ? wc : null; // changed for the following IE compatible filter
+            var wcFilter = function wcFilter(wc) {
+                var components = gx.forminspector(gxobjectWC.toLowerCase());
+                return gxobjectWC && components.length > 0 && components[0].id.endsWith(wc.CmpContext) ? wc : null;
+            };
+
             const gFilter = g => ((g.realGridName.toLowerCase() === ctrl_gxid.toLowerCase()) && (!row || (g.parentRow.gxId === row))) ? g : null;
-            const wcGrids = gx.O.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat();
-            const mpGrids = gx.O.MasterPage ? gx.O.MasterPage.Grids : [];
-            let Grids = (!gxobjectWC ? gx.O.Grids : []).concat(wcGrids).concat(mpGrids);
-            const retObj = g =>	{
+            const wcGrids = gx.pO.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat();
+            const mpGrids = gx.pO.MasterPage ? gx.pO.MasterPage.Grids : [];
+            let Grids = (!gxobjectWC ? gx.pO.Grids : []).concat(wcGrids).concat(mpGrids);
+            /*const retObj = g =>	{
                 return {
                     id: g.getContainerControl().id ,
                     cmp: g.parentObject?.CmpContext || "",
                     rows: g.grid.rows.length,
                     inMasterPage: g.parentObject?.IsMasterPage || false,
+                }
+            };*/ // Changed for the IE compatible function
+            var retObj = function retObj(g) {
+                var _g$parentObject;
+                var closestWC = gx.$("#" + g.getContainerControlId()).closest('[class=gxwebcomponent]');
+                var wcId = closestWC.length > 0 ? closestWC[0].id : "";
+                var wcName = wcId ? gx.$("#" + wcId).attr('data-gx-control-name') : "";
+                if (!gxobjectWC || wcName.toLowerCase() === gxobjectWC.toLowerCase()) {
+                    return {
+                        id: g.getContainerControlId(),
+                        cmpctrl_gxid: wcName,
+                        rows: g.grid.rows.length,
+                        inMasterPage: (_g$parentObject === void 0 ? void 0 : _g$parentObject.IsMasterPage) || false
+                    };
                 }
             };
             return Grids.filter( gFilter).map(retObj);
