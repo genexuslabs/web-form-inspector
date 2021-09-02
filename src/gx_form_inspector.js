@@ -96,8 +96,6 @@ window.addEventListener("load", () => {
         ret = gx.$.map( targets, function( target) {
             let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
 					const gxCtrlName = gx.$(el).attr( gx_control_att);
-                    //let stripCmpName = id => id.replace(/^gxHTMLWrp/,''); // unused variables
-                    //let id = el.id;
 					return (!gxobjectWC || gxobjectWC.toLowerCase() === gxCtrlName) ?
 						{	isComponent: target === el,
 							cmpctrl_gxid: gxCtrlName, 
