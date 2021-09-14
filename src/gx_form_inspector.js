@@ -48,8 +48,9 @@ if (!String.prototype.startsWith) {
 ///////
 window.addEventListener("load", () => {
     gx.forminspector = function (ctrl_gxid, row, gxobjectWC) {
-        const gx_control_att = 'data-gx-control-name';
-        const initialize_gx_object = function(gxo) {
+        const gx_control_att = 'data-gx-control-name',
+			  gx_prompt_att = 'data-gx-prompt-name';
+		const initialize_gx_object = function(gxo) {
 				if (gxo && gxo.GXCtrlIds) {
                     gxo.GXCtrlIds.map( i => {
                         let vStruct = gxo.GXValidFnc[i];
@@ -64,8 +65,13 @@ window.addEventListener("load", () => {
                                 else {
                                     gxName = vStruct.fld;
                                 }
-                                let rExp = new RegExp(`(span_)?${gxo.CmpContext}${vStruct.fld}(_([0-9]{4})*)?$`);
-                                $('[id]').filter(function() {return $(this)[0].id.match(rExp)}).attr(gx_control_att, gxName.toLowerCase());
+                                let rExp = new RegExp(`(span_)?${gxo.CmpContext}${vStruct.fld}(_([0-9]{4})*)?$`),
+                  									prompt = gx.attachedControls.filter((attC) => {return attC.info.isPrompt && attC.info.controls.slice(-1) == vStruct.id});
+                                                  $('[id]').filter(function() {return $(this)[0].id.match(rExp)})
+                  									.attr(gx_control_att, gxName.toLowerCase())
+                  									.attr(gx_prompt_att, function() {
+                  										return prompt.length ? prompt[0].id : null
+                  									});
                             }
                         }
                     });
@@ -103,13 +109,14 @@ window.addEventListener("load", () => {
                 }
             );
             let inMasterPage = target.id.endsWith('_MPAGE'),
-            el = {
-                inMasterPage, 
-                id:target.id, 
-                value: target.value,
-                text: target.textContent
-            },
-            ballonEl;
+    				el = {
+    					inMasterPage, 
+    					id:target.id, 
+    					value: target.value,
+    					text: target.textContent,
+    					prompt: `${target.getAttribute(gx_prompt_att)}_${target.id.match(/([0-9]{4})+/)[0]}`
+    				},
+    				ballonEl;
             if (cmpElement.length === 0) {
                 el = gxobjectWC ? null : 
                     [
