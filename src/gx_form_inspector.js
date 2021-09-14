@@ -102,25 +102,32 @@ window.addEventListener("load", () => {
 						}:null;
                 }
             );
-            let inMasterPage = target.id.endsWith('_MPAGE');
+            let inMasterPage = target.id.endsWith('_MPAGE'),
+            el = {
+                inMasterPage, 
+                id:target.id, 
+                value: target.value,
+                text: target.textContent
+            },
+            ballonEl;
             if (cmpElement.length === 0) {
-                return gxobjectWC ? null :
-						[{	inMasterPage: inMasterPage, 
-							id:target.id, 
-							isComponent:false,
-							value: target.value,
-							text: target.textContent
-						}];
+                el = gxobjectWC ? null : 
+                    [
+                        {	...el,
+                            validationText: ( ballonEl = $(`#${el.id}_Balloon`), ballonEl.is(':visible') ? ballonEl.text() : '' ),
+                            isComponent:false
+                        }
+                    ];
 			}
 			else {
-                return [{	inMasterPage: inMasterPage, 
-							id:target.id, 
+                el = [
+                        {	...el,
 							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
-							isComponent:cmpElement[0].isComponent,
-							value: target.value,
-							text: target.textContent
-						}];
+							isComponent:cmpElement[0].isComponent
+					    }
+                    ];
             }
+            return el;
         });
 		gx.$(ret).each(function(i, el) {
   	  		let nRows = gx.$(`#${el.id} tr, #${el.id} div[class=row], #${el.id} div[data-gx-smarttable-cell], #${el.id} div[data-gx-canvas-cell]`).length;
