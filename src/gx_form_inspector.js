@@ -97,7 +97,11 @@ window.addEventListener("load", () => {
         if (row) {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
-        let targets = gx.$(selector);
+
+        let targets = gx.$(`${selector}`);
+        if (targets.length > 1) {
+            targets = gx.$(`${selector}:visible`);
+        }
 
         ret = gx.$.map( targets, function( target) {
             let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
@@ -116,11 +120,14 @@ window.addEventListener("load", () => {
     				el = {
     					inMasterPage, 
     					id:target.id, 
-    					value: target.value,
+    					value: target.value||target.textContent,
     					text: target.textContent,
-    					prompt: prompt_id
     				},
     				ballonEl;
+            if (prompt_id) {
+                el.prompt = prompt_id;
+            }
+            el.isEnabled = (target.getAttribute('data-gx-readonly') == null);
             if (cmpElement.length === 0) {
                 el = gxobjectWC ? null : 
                     [
