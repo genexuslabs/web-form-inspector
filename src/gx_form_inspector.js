@@ -109,12 +109,16 @@ window.addEventListener("load", () => {
                 }
             );
             let inMasterPage = target.id.endsWith('_MPAGE'),
+                    prompt = target.getAttribute(gx_prompt_att),
+                    prompt_row = target.id.match(/([0-9]{4})+/),
+                    prompt_row_id = prompt_row ? `_${prompt_row[0]}` : '',
+                    prompt_id = prompt ? `${prompt}${prompt_row_id}`:undefined,
     				el = {
     					inMasterPage, 
     					id:target.id, 
     					value: target.value,
     					text: target.textContent,
-    					prompt: `${target.getAttribute(gx_prompt_att)}_${target.id.match(/([0-9]{4})+/)[0]}`
+    					prompt: prompt_id
     				},
     				ballonEl;
             if (cmpElement.length === 0) {
