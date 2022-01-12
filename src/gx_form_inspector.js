@@ -48,8 +48,9 @@ if (!String.prototype.startsWith) {
 ///////
 window.addEventListener("load", () => {
     gx.forminspector = function (ctrl_gxid, row, gxobjectWC) {
-        const gx_control_att = 'data-gx-control-name',
-			  gx_prompt_att = 'data-gx-prompt-name';
+		const gx_control_att = 'data-gx-control-name',
+			gx_cmp_prefix_att = 'data-gx-cmp-prefix',
+			gx_prompt_att = 'data-gx-prompt-name';
 		const initialize_gx_object = function(gxo) {
 				if (gxo && gxo.GXCtrlIds) {
                     gxo.GXCtrlIds.map( i => {
@@ -72,11 +73,16 @@ window.addEventListener("load", () => {
                   									.attr(gx_prompt_att, function() {
                   										return prompt.length ? prompt[0].id : null
                   									});
+                                    $('input[type=radio]')
+                                    .filter(function() {return $(this)[0].name.match(rExp)})
+                  									.attr(gx_control_att, gxName.toLowerCase());
                             }
                         }
                     });
 					for (wc in gxo.CmpControls) {
-						$(`#${gxo.CmpContext}gxHTMLWrp${gxo.CmpControls[wc].Prefix}`).attr(gx_control_att, gxo.CmpControls[wc].id.toLowerCase())
+						$(`#${gxo.CmpContext}gxHTMLWrp${gxo.CmpControls[wc].Prefix}`)
+							.attr(gx_control_att, gxo.CmpControls[wc].id.toLowerCase())
+							.attr(gx_cmp_prefix_att, gxo.CmpControls[wc].Prefix);
 					}
 				}					
         };
@@ -102,25 +108,32 @@ window.addEventListener("load", () => {
         if (targets.length > 1) {
             targets = gx.$(`${selector}:visible`);
         }
+		
+    		const targetValue = (target, gxO) => {
+    			const id = target.type === 'radio' ? target.name : target.id;
+    			return gx.fn.getControlValue_impl(id, undefined, gxO).toString();			
+    		};
 
         ret = gx.$.map( targets, function( target) {
-            let cmpElement = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
-					const gxCtrlName = gx.$(el).attr( gx_control_att);
-					return (!gxobjectWC || gxobjectWC.toLowerCase() === gxCtrlName) ?
-						{	isComponent: target === el,
-							cmpctrl_gxid: gxCtrlName, 
-						}:null;
-                }
-            );
-            let inMasterPage = target.id.endsWith('_MPAGE'),
-                    prompt = target.getAttribute(gx_prompt_att),
+            let 	inMasterPage = target.id.endsWith('_MPAGE'),
+					cmpElementsArr = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
+							const gxCtrlName = gx.$(el).attr( gx_control_att);
+							return (!gxobjectWC || gxobjectWC.toLowerCase() === gxCtrlName) ?
+								{	isComponent: target === el,
+									cmpctrl_gxid: gxCtrlName, 
+									cmpprefix: gx.$(el).attr(gx_cmp_prefix_att)
+								}:null;
+						}
+					),
+					cmpElement = cmpElementsArr.length ? cmpElementsArr[0] : undefined,
+					gxO = cmpElement ? cmpElement : (inMasterPage ? gx.pO.MasterPage : gx.pO),
+					prompt = target.getAttribute(gx_prompt_att),
                     prompt_row = target.id.match(/([0-9]{4})+/),
                     prompt_row_id = prompt_row ? `_${prompt_row[0]}` : '',
                     prompt_id = prompt ? `${prompt}${prompt_row_id}`:undefined,
     				el = {
     					inMasterPage, 
-    					id:target.id, 
-    					value: target.value||target.textContent,
+    					id:target.id,
     					text: target.textContent,
     				},
     				ballonEl;
@@ -128,20 +141,23 @@ window.addEventListener("load", () => {
                 el.prompt = prompt_id;
             }
             el.isEnabled = (target.getAttribute('data-gx-readonly') == null);
-            if (cmpElement.length === 0) {
+            if (!cmpElement || cmpElement.length === 0) {
                 el = gxobjectWC ? null : 
                     [
                         {	...el,
                             validationText: ( ballonEl = $(`#${el.id}_Balloon`), ballonEl.is(':visible') ? ballonEl.text() : '' ),
+              							value: targetValue(target, gxO),
                             isComponent:false
                         }
                     ];
 			}
 			else {
+				gxO = gx.O.WebComponents[cmpElement.cmpprefix];
                 el = [
                         {	...el,
-							cmpctrl_gxid:cmpElement[0].cmpctrl_gxid,
-							isComponent:cmpElement[0].isComponent
+							cmpctrl_gxid:cmpElement.cmpctrl_gxid,
+							value: targetValue(target, gxO),
+							isComponent:cmpElement.isComponent
 					    }
                     ];
             }
