@@ -104,15 +104,22 @@ window.addEventListener("load", () => {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
 
-        let targets = gx.$(`${selector}`);
+        let targets = gx.$(`${selector}`),
+        visibleTargets;
         if (targets.length > 1) {
-            targets = gx.$(`${selector}:visible`);
+            visibleTargets = gx.$(`${selector}:visible`);
+      			if (visibleTargets.length > 0) {
+      				targets = visibleTargets;
+      			}
         }
 		
     		const targetValue = (target, gxO) => {
-    			const id = target.type === 'radio' ? target.name : target.id;
-    			return gx.fn.getControlValue_impl(id, undefined, gxO).toString();			
-    		};
+		      if (target.tagName && target.tagName === 'input' && target.type != 'file') {
+			      const id = target.type === 'radio' ? target.name : target.id;
+  			      return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
+		      }
+          return target.value || target.textContent;
+        };
 
         ret = gx.$.map( targets, function( target) {
             let 	inMasterPage = target.id.endsWith('_MPAGE'),
