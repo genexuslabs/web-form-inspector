@@ -114,7 +114,7 @@ window.addEventListener("load", () => {
         }
 		
     		const targetValue = (target, gxO) => {
-		      if (target.tagName && target.tagName === 'input' && target.type != 'file') {
+		      if (target.tagName && target.tagName.toLowerCase() === 'input' && target.type !== 'file') {
 			      const id = target.type === 'radio' ? target.name : target.id;
   			      return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
 		      }
