@@ -104,22 +104,26 @@ window.addEventListener("load", () => {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
 
-        let targets = gx.$(`${selector}`),
+        var targets = gx.$("".concat(selector)),
         visibleTargets;
-        if (targets.length > 1) {
-            visibleTargets = gx.$(`${selector}:visible`);
-      			if (visibleTargets.length > 0) {
-      				targets = visibleTargets;
-      			}
-        }
+	
+	    if (targets.length > 1 && targets.attr(gx_control_type_att) !== 'bits') {
+		visibleTargets = gx.$("".concat(selector, ":visible"));
+
+		if (visibleTargets.length > 0) {
+		    targets = visibleTargets;
+		}
+	    }
 		
-    		const targetValue = (target, gxO) => {
-		      if (target.tagName && target.tagName.toLowerCase() === 'input' && target.type !== 'file') {
-			      const id = target.type === 'radio' ? target.name : target.id;
-  			      return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
-		      }
-          return target.value || target.textContent;
-        };
+    	var targetValue = function targetValue(target, gxO) {
+		//getControlValue_impl of checkbox always returns true or false and not the real control value. 
+		var excludedInputTypes = ['file', 'checkbox']; 
+		if (target.tagName && target.tagName.toLowerCase() === 'input' && excludedInputTypes.indexOf(target.type) < 0) {
+		    var id = target.type === 'radio' ? target.name : target.id;
+		    return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
+		}
+        	return target.value;
+    	};
 
         ret = gx.$.map( targets, function( target) {
             let 	inMasterPage = target.id.endsWith('_MPAGE'),
