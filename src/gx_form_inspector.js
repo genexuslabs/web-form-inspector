@@ -58,7 +58,7 @@ window.addEventListener("load", () => {
                         if (vStruct){
                             let gxName = '';
                             if (vStruct.fld) {
-                                if (vStruct.gxvar) {
+                                if (vStruct.gxvar && !vStruct.v2bc) {
                                     //Genexus Var or Att
                                     let bIsVar = vStruct.gxvar.startsWith('AV');
                                     gxName = `${(bIsVar?'&':'')}${vStruct.gxvar.replace(/^AV?\d*/, '')}` ;
