@@ -164,7 +164,7 @@ window.addEventListener("load", () => {
                     [
                         {	...el,
                             validationText: ( ballonEl = $(`#${el.id}_Balloon`), ballonEl.is(':visible') ? ballonEl.text() : '' ),
-              				alue: targetValue(target, gxO),
+              				value: targetValue(target, gxO),
                             text: target.textContent,
                             isComponent:false
                         }
