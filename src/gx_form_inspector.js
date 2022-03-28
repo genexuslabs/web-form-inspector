@@ -50,7 +50,8 @@ window.addEventListener("load", () => {
     gx.forminspector = function (ctrl_gxid, row, gxobjectWC) {
 		const gx_control_att = 'data-gx-control-name',
 			gx_cmp_prefix_att = 'data-gx-cmp-prefix',
-			gx_prompt_att = 'data-gx-prompt-name';
+			gx_prompt_att = 'data-gx-prompt-name',
+  		    gx_control_type_att = 'data-gx-control-type';
 		const initialize_gx_object = function(gxo) {
 				if (gxo && gxo.GXCtrlIds) {
                     gxo.GXCtrlIds.map( i => {
@@ -66,16 +67,23 @@ window.addEventListener("load", () => {
                                 else {
                                     gxName = vStruct.fld;
                                 }
-                                let rExp = new RegExp(`(span_)?${gxo.CmpContext}${vStruct.fld}(_([0-9]{4})*)?$`),
-                  									prompt = gx.attachedControls.filter((attC) => {return attC.info.isPrompt && attC.info.controls.slice(-1) == vStruct.id});
-                                                  $('[id]').filter(function() {return $(this)[0].id.match(rExp)})
-                  									.attr(gx_control_att, gxName.toLowerCase())
-                  									.attr(gx_prompt_att, function() {
-                  										return prompt.length ? prompt[0].id : null
-                  									});
-                                    $('input[type=radio]')
-                                    .filter(function() {return $(this)[0].name.match(rExp)})
-                  									.attr(gx_control_att, gxName.toLowerCase());
+                                let rExp = new RegExp("(span_)?".concat(gxo.CmpContext).concat(vStruct.fld, "(_([0-9]{4})*)?$")),
+                                    prompt = gx.attachedControls.filter(function (attC) {
+                                        return attC.info.isPrompt && attC.info.controls.slice(-1) == vStruct.id;
+                                    });
+                                $('[id]').filter(function () {
+                                    return $(this)[0].id.match(rExp);
+                                })
+                                .attr(gx_control_att, gxName.toLowerCase())
+                                .attr(gx_prompt_att, function() {
+                                    return prompt.length ? prompt[0].id : null;
+                                })
+                                .attr(gx_control_type_att, vStruct.type);
+                                $('input[type=radio]')
+                                .filter(function () {
+                                return $(this)[0].name.match(rExp);
+                                })
+                                .attr(gx_control_att, gxName.toLowerCase());
                             }
                         }
                     });
@@ -104,24 +112,23 @@ window.addEventListener("load", () => {
             selector = `[data-gxrow="${srow}"] ` + selector;
         }
 
-        var targets = gx.$("".concat(selector)),
+        let targets = gx.$(`${selector}`),
         visibleTargets;
 	
 	    if (targets.length > 1 && targets.attr(gx_control_type_att) !== 'bits') {
-		visibleTargets = gx.$("".concat(selector, ":visible"));
+            visibleTargets = gx.$(`${selector}:visible`);
 
-		if (visibleTargets.length > 0) {
-		    targets = visibleTargets;
-		}
+            if (visibleTargets.length > 0) {
+                targets = visibleTargets;
+            }
 	    }
 		
-    	var targetValue = function targetValue(target, gxO) {
-		//getControlValue_impl of checkbox always returns true or false and not the real control value. 
-		var excludedInputTypes = ['file', 'checkbox']; 
-		if (target.tagName && target.tagName.toLowerCase() === 'input' && excludedInputTypes.indexOf(target.type) < 0) {
-		    var id = target.type === 'radio' ? target.name : target.id;
-		    return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
-		}
+    	const targetValue = (target, gxO) => {
+            const excludedInputTypes = ['file']; 
+            if (target.tagName && target.tagName.toLowerCase() === 'input' && excludedInputTypes.indexOf(target.type) < 0) {
+                const id = target.type === 'radio' ? target.name : target.id;
+                return gx.fn.getControlValue_impl(id, undefined, gxO).toString();
+            }
         	return target.value;
     	};
 
@@ -157,7 +164,8 @@ window.addEventListener("load", () => {
                     [
                         {	...el,
                             validationText: ( ballonEl = $(`#${el.id}_Balloon`), ballonEl.is(':visible') ? ballonEl.text() : '' ),
-              							value: targetValue(target, gxO),
+              				alue: targetValue(target, gxO),
+                            text: target.textContent,
                             isComponent:false
                         }
                     ];
@@ -168,6 +176,7 @@ window.addEventListener("load", () => {
                         {	...el,
 							cmpctrl_gxid:cmpElement.cmpctrl_gxid,
 							value: targetValue(target, gxO),
+                            text: target.textContent,
 							isComponent:cmpElement.isComponent
 					    }
                     ];
@@ -205,38 +214,28 @@ window.addEventListener("load", () => {
             //gxobjectWC is an optional filter to do the search over a specific Genexus WebComponent (Optional)
             const {ctrl_gxid = "", row = "", gxobjectWC = ""} = opts;
 
-            //const wcFilter = wc => !gxobjectWC || wc.ServerClass === gxobjectWC.toLowerCase() ? wc : null; // changed for the following IE compatible filter
-            var wcFilter = function wcFilter(wc) {
-                var components = gx.forminspector(gxobjectWC.toLowerCase());
+            const wcFilter = wc => {
+                let components = gx.forminspector(gxobjectWC.toLowerCase());
                 return gxobjectWC && components.length > 0 && components[0].id.endsWith(wc.CmpContext) ? wc : null;
             };
 
-            const gFilter = g => ((g.realGridName.toLowerCase() === ctrl_gxid.toLowerCase()) && (!row || (g.parentRow.gxId === row))) ? g : null;
-            const wcGrids = gx.pO.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat();
-            const mpGrids = gx.pO.MasterPage ? gx.pO.MasterPage.Grids : [];
-            let Grids = (!gxobjectWC ? gx.pO.Grids : []).concat(wcGrids).concat(mpGrids);
-            /*const retObj = g =>	{
-                return {
-                    id: g.getContainerControl().id ,
-                    cmp: g.parentObject?.CmpContext || "",
-                    rows: g.grid.rows.length,
-                    inMasterPage: g.parentObject?.IsMasterPage || false,
-                }
-            };*/ // Changed for the IE compatible function
-            var retObj = function retObj(g) {
-                var _g$parentObject;
-                var closestWC = gx.$("#" + g.getContainerControlId()).closest('[class=gxwebcomponent]');
-                var wcId = closestWC.length > 0 ? closestWC[0].id : "";
-                var wcName = wcId ? gx.$("#" + wcId).attr('data-gx-control-name') : "";
-                if (!gxobjectWC || wcName.toLowerCase() === gxobjectWC.toLowerCase()) {
-                    return {
-                        id: g.getContainerControlId(),
-                        cmpctrl_gxid: wcName,
-                        rows: g.grid.rows.length,
-                        inMasterPage: (_g$parentObject === void 0 ? void 0 : _g$parentObject.IsMasterPage) || false
-                    };
-                }
-            };
+            const gFilter = g => ((g.realGridName.toLowerCase() === ctrl_gxid.toLowerCase()) && (!row || (g.parentRow.gxId === row))) ? g : null,
+                wcGrids = gx.pO.WebComponents.filter(wcFilter).map( wc => wc.Grids).flat(),
+                mpGrids = gx.pO.MasterPage ? gx.pO.MasterPage.Grids : [],
+                Grids = (!gxobjectWC ? gx.pO.Grids : []).concat(wcGrids).concat(mpGrids),
+                retObj = g => {
+                    let closestWC = gx.$("#" + g.getContainerControlId()).closest('[class=gxwebcomponent]'),
+                        wcId = closestWC.length > 0 ? closestWC[0].id : "";
+                        wcName = wcId ? gx.$("#" + wcId).attr('data-gx-control-name') : "";
+                    if (!gxobjectWC || wcName.toLowerCase() === gxobjectWC.toLowerCase()) {
+                        return {
+                            id: g.getContainerControlId(),
+                            cmpctrl_gxid: wcName,
+                            rows: g.grid.rows.length,
+                            inMasterPage: g.parentObject?.IsMasterPage || false
+                        };
+                    }
+                };
             return Grids.filter( gFilter).map(retObj);
         }
     }
