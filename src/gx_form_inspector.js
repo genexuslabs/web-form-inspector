@@ -87,7 +87,7 @@ window.addEventListener("load", () => {
                             }
                         }
                     });
-					for (wc in gxo.CmpControls) {
+					for (let wc in gxo.CmpControls) {
 						$(`#${gxo.CmpContext}gxHTMLWrp${gxo.CmpControls[wc].Prefix}`)
 							.attr(gx_control_att, gxo.CmpControls[wc].id.toLowerCase())
 							.attr(gx_cmp_prefix_att, gxo.CmpControls[wc].Prefix);
@@ -132,7 +132,7 @@ window.addEventListener("load", () => {
         	return target.value;
     	};
 
-        ret = gx.$.map( targets, function( target) {
+        let ret = gx.$.map( targets, function( target) {
             let 	inMasterPage = target.id.endsWith('_MPAGE'),
 					cmpElementsArr = gx.$(target).closest('[class=gxwebcomponent]').map( (i,el) => {
 							const gxCtrlName = gx.$(el).attr( gx_control_att);
@@ -158,7 +158,7 @@ window.addEventListener("load", () => {
             if (prompt_id) {
                 el.prompt = prompt_id;
             }
-            el.isEnabled = (target.getAttribute('data-gx-readonly') == null);
+            el.isEnabled = !(target.hasAttribute('data-gx-readonly') || target.classList.contains('gx-disabled'));
             if (!cmpElement || cmpElement.length === 0) {
                 el = gxobjectWC ? null : 
                     [
