@@ -67,7 +67,7 @@ window.addEventListener("load", () => {
                                 else {
                                     gxName = vStruct.fld;
                                 }
-                                let rExp = new RegExp("(span_)?".concat(gxo.CmpContext).concat(vStruct.fld, "(_([0-9]{4})*)?$")),
+                                let rExp = new RegExp("^(span_)?".concat(gxo.CmpContext).concat(vStruct.fld, "(_([0-9]{4})*)?$")),
                                     prompt = gx.attachedControls.filter(function (attC) {
                                         return attC.info.isPrompt && attC.info.controls.slice(-1) == vStruct.id;
                                     });
